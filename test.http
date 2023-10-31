@@ -1,0 +1,22 @@
+GET http://localhost:5050/users
+
+####
+
+GET http://localhost:5050/users/653fa05158e6cebb04d174d8
+
+####
+
+POST http://localhost:5050/users/create
+Content-Type: application/json
+
+{
+    "nome": "Pippo",
+    "cognome": "De Pippus",
+    "email": "depippus@gmail.com",
+    "avatar": "",
+    "password": "passwordDiProva"
+}
+
+####
+
+GET http://localhost:5050/products
