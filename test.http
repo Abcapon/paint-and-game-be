@@ -30,3 +30,18 @@ Content-Type: application/json
     "email" : "abcapon89@gmail.com",
     "password" : "CicciPicci"
 }
+
+####
+GET http://localhost:5050/blog
+
+####
+POST http://localhost:5050/blog/create
+Content-Type: application/json
+
+{
+    "title" : "avatar",
+    "category" : "fantasy",
+    "content" : "tutto fa mucio",
+    "cover" : "",
+    "author" : "6542506aa62ed9100e3c1f72"
+}

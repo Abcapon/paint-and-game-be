@@ -86,4 +86,43 @@ products.post(
 	}
 );
 
+products.patch(
+	`/products/:productId`,
+	cloudUpload.single("cover"),
+	async (req, res) => {
+		const { productId } = req.params;
+		const productExist = await ProductModel.findById(productId);
+
+		if (!productExist) {
+			return res.status(404).send({
+				statusCode: 404,
+				message: "This product doesn't exist",
+			});
+		}
+		try {
+			const dataToUpdate = req.body;
+			if (req.file) {
+				const imageUrl = req.file.path;
+				dataToUpdate.cover = imageUrl;
+			}
+			const options = { new: true };
+			const updatedProduct = await ProductModel.findByIdAndUpdate(
+				productId,
+				dataToUpdate,
+				options
+			);
+			res.status(200).send({
+				statusCode: 200,
+				message: "Product successfully modified",
+				updatedProduct,
+			});
+		} catch (e) {
+			res.status(500).send({
+				statusCode: 500,
+				message: "Server internal error",
+			});
+		}
+	}
+);
+
 module.exports = products;
