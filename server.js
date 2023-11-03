@@ -4,6 +4,7 @@ const mongoose = require(`mongoose`);
 const usersRoute = require(`./routes/users`);
 const productsRoute = require(`./routes/products`);
 const loginRoute = require(`./routes/login`);
+const githubRoute = require(`./routes/github`);
 
 const cors = require(`cors`);
 
@@ -19,6 +20,7 @@ app.use(express.json());
 app.use(`/`, usersRoute);
 app.use(`/`, loginRoute);
 app.use(`/`, productsRoute);
+app.use(`/`, githubRoute);
 
 mongoose.connect(process.env.MONGODB_URL, {
 	useNewUrlParser: true,

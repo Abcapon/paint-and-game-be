@@ -20,3 +20,13 @@ Content-Type: application/json
 ####
 
 GET http://localhost:5050/products
+
+####
+
+POST http://localhost:5050/login
+Content-Type: application/json
+
+{
+    "email" : "abcapon89@gmail.com",
+    "password" : "CicciPicci"
+}

@@ -10,7 +10,7 @@ login.post(`/login`, async (req, res) => {
 
 	if (!user) {
 		return res.status(404).send({
-			message: `Invalid User name or password`,
+			message: `Invalid User name or password 1`,
 			statusCode: 404,
 		});
 	}
@@ -19,7 +19,7 @@ login.post(`/login`, async (req, res) => {
 	if (!validPassword) {
 		return res.status(400).send({
 			statusCode: 400,
-			message: "Invalid User name or password",
+			message: "Invalid User name or password 2",
 		});
 	}
 	const token = jwt.sign(
@@ -29,6 +29,7 @@ login.post(`/login`, async (req, res) => {
 			surname: user.surname,
 			email: user.email,
 			avatar: user.avatar,
+			role: user.role,
 		},
 		process.env.JWT_SECRET,
 		{ expiresIn: "24h" }

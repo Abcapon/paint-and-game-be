@@ -17,6 +17,10 @@ const ProductSchema = new mongoose.Schema(
 		cover: {
 			type: String,
 		},
+		isInPromo: {
+			type: Boolean,
+			default: false,
+		},
 	},
 	{ timestamps: true, strict: true }
 );
