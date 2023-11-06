@@ -110,30 +110,43 @@ users.post(`/users/create`, cloudUpload.single("avatar"), async (req, res) => {
 	}
 });
 
-users.patch(`/users/:userId`, async (req, res) => {
-	const { userId } = req.params;
-	const user = await UserModel.findById(userId);
-	if (!user) {
-		return res.status(400).send({
-			statusCode: 400,
-			message: "User don't found",
-		});
+users.patch(
+	`/users/:userId`,
+	cloudUpload.single("avatar"),
+	async (req, res) => {
+		const { userId } = req.params;
+		const user = await UserModel.findById(userId);
+		if (!user) {
+			return res.status(400).send({
+				statusCode: 400,
+				message: "User don't found",
+			});
+		}
+		try {
+			const dataToUpdate = req.body;
+			if (req.file) {
+				const imageUrl = req.file.path;
+				dataToUpdate.avatar = imageUrl;
+			}
+			const options = { new: true };
+			const updatedUser = await UserModel.findByIdAndUpdate(
+				postId,
+				dataToUpdate,
+				options
+			);
+			res.status(200).sendStatus({
+				statusCode: 200,
+				message: "User successfully modified",
+				updatedUser,
+			});
+		} catch (e) {
+			res.status(500).send({
+				statusCode: 500,
+				message: "Server internal error",
+			});
+		}
 	}
-	try {
-		const dataToUpdate = req.body;
-		const options = { new: true };
-		const result = await UserModel.findByIdAndUpdate(
-			postId,
-			dataToUpdate,
-			options
-		);
-	} catch (e) {
-		res.status(500).send({
-			statusCode: 500,
-			message: "Server internal error",
-		});
-	}
-});
+);
 
 users.delete(`/users/:usersId`, async (req, res) => {
 	const { usersId } = req.params;

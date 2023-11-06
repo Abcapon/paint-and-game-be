@@ -125,4 +125,27 @@ products.patch(
 	}
 );
 
+products.delete(`/products/delete/:productId`, async (req, res) => {
+	const { productId } = req.params;
+
+	try {
+		const product = await PostModel.findByIdAndDelete(productId);
+		if (!product) {
+			return res.status(404).send({
+				statusCode: 404,
+				message: "Product not found or already deleted",
+			});
+		}
+		res.status(200).send({
+			statusCode: 200,
+			message: "Product deleted successfully",
+		});
+	} catch (e) {
+		res.status(500).send({
+			statusCode: 500,
+			message: "Server internal error",
+		});
+	}
+});
+
 module.exports = products;
