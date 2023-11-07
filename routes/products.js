@@ -67,6 +67,7 @@ products.post(
 			description: req.body.description,
 			price: req.body.price,
 			cover: req.file.path,
+			isInPromo: req.body.promo,
 		});
 
 		try {
@@ -129,7 +130,7 @@ products.delete(`/products/delete/:productId`, async (req, res) => {
 	const { productId } = req.params;
 
 	try {
-		const product = await PostModel.findByIdAndDelete(productId);
+		const product = await ProductModel.findByIdAndDelete(productId);
 		if (!product) {
 			return res.status(404).send({
 				statusCode: 404,

@@ -45,3 +45,20 @@ Content-Type: application/json
     "cover" : "",
     "author" : "6542506aa62ed9100e3c1f72"
 }
+
+####
+POST http://localhost:5050/create-checkout-session
+Content-Type: application/json
+
+{
+  "cartItems": [
+    {
+      "name": "Prodotto 1",
+      "price": 1000
+    },
+    {
+      "name": "Prodotto 2",
+      "price": 1500
+    }
+  ]
+}

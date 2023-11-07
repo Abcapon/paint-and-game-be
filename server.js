@@ -6,6 +6,7 @@ const productsRoute = require(`./routes/products`);
 const loginRoute = require(`./routes/login`);
 const githubRoute = require(`./routes/github`);
 const blogRoute = require(`./routes/blogArticles`);
+const stripeRoute = require(`./routes/stripe`);
 
 const cors = require(`cors`);
 
@@ -23,6 +24,7 @@ app.use(`/`, loginRoute);
 app.use(`/`, productsRoute);
 app.use(`/`, githubRoute);
 app.use(`/`, blogRoute);
+app.use(`/`, stripeRoute);
 
 mongoose.connect(process.env.MONGODB_URL, {
 	useNewUrlParser: true,
