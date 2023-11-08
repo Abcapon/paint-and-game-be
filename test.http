@@ -54,11 +54,13 @@ Content-Type: application/json
   "cartItems": [
     {
       "name": "Prodotto 1",
-      "price": 1000
+      "price": 1000,
+      "quantity": 1
     },
     {
       "name": "Prodotto 2",
-      "price": 1500
+      "price": 1500,
+      "quantity": 1
     }
   ]
 }

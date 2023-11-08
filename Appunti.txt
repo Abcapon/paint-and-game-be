@@ -1,1 +1,3 @@
 controllare se funzionano le chiamate patch dei prodotti e degli utenti in quanto sono state unite in un'unica chiamata sia la modifica dell'immagine che degli altri alementi.
+
+eliminare console.log della rotta stripe
