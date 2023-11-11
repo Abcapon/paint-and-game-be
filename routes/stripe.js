@@ -1,35 +1,35 @@
 const express = require("express");
-const stripe = express.Router();
+const str = express.Router();
 require("dotenv").config();
 
-const stripeKey = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
-stripe.post("/create-checkout-session", async (req, res) => {
-	const { cartItems } = req.body;
-	console.log("Dati del carrello:", cartItems);
+const calculateOrderAmount = (items) => {
+	const totalAmount = items.reduce((accumulator, item) => {
+		return accumulator + item.price;
+	}, 0);
 
-	const line_items = cartItems.map((item) => {
-		return {
-			price_data: {
-				currency: "eur",
-				product_data: {
-					name: item.name,
-				},
-				unit_amount: item.price * 100,
-			},
-			quantity: item.quantity,
-		};
+	return totalAmount;
+};
+
+str.post("/create-payment-intent", async (req, res) => {
+	const { items } = req.body;
+	console.log("Received items:", items);
+
+	// Create a PaymentIntent with the order amount and currency
+	const paymentIntent = await stripe.paymentIntents.create({
+		amount: calculateOrderAmount(items) * 100,
+
+		currency: "eur",
+		// In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
+		automatic_payment_methods: {
+			enabled: true,
+		},
 	});
 
-	const session = await stripeKey.checkout.sessions.create({
-		line_items,
-		mode: "payment",
-		ui_mode: "embedded",
-		return_url:
-			"https://example.com/checkout/return?session_id={CHECKOUT_SESSION_ID}",
+	res.send({
+		clientSecret: paymentIntent.client_secret,
 	});
-
-	res.send({ clientSecret: session.client_secret });
 });
 
-module.exports = stripe;
+module.exports = str;
