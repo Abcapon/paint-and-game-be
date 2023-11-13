@@ -6,40 +6,59 @@ const jwt = require(`jsonwebtoken`);
 require(`dotenv`).config();
 
 login.post(`/login`, async (req, res) => {
-	const user = await UserModel.findOne({ email: req.body.email });
+	try {
+		const user = await UserModel.findOne({ email: req.body.email });
 
-	if (!user) {
-		return res.status(404).send({
-			message: `Invalid User name or password 1`,
-			statusCode: 404,
+		if (!user) {
+			return res.status(404).send({
+				message: `Invalid User name or password 1`,
+				statusCode: 404,
+			});
+		}
+
+		// Aggiunta della verifica dell'utente
+		if (!user.verified) {
+			return res.status(401).send({
+				message: "User not verified. Please check your email for confirmation.",
+				statusCode: 401,
+			});
+		}
+
+		const validPassword = await bcrypt.compare(
+			req.body.password,
+			user.password
+		);
+		if (!validPassword) {
+			return res.status(400).send({
+				statusCode: 400,
+				message: "Invalid User name or password 2",
+			});
+		}
+
+		const token = jwt.sign(
+			{
+				id: user._id,
+				name: user.name,
+				surname: user.surname,
+				email: user.email,
+				role: user.role,
+			},
+			process.env.JWT_SECRET,
+			{ expiresIn: "24h" }
+		);
+
+		res.header("Authorization", token).status(200).send({
+			message: "Successful login",
+			statusCode: 200,
+			token,
+		});
+	} catch (error) {
+		console.error("Error during login:", error);
+		res.status(500).send({
+			statusCode: 500,
+			message: "Internal server error",
 		});
 	}
-
-	const validPassword = await bcrypt.compare(req.body.password, user.password);
-	if (!validPassword) {
-		return res.status(400).send({
-			statusCode: 400,
-			message: "Invalid User name or password 2",
-		});
-	}
-	const token = jwt.sign(
-		{
-			id: user._id,
-			name: user.name,
-			surname: user.surname,
-			email: user.email,
-			avatar: user.avatar,
-			role: user.role,
-		},
-		process.env.JWT_SECRET,
-		{ expiresIn: "24h" }
-	);
-
-	res.header("Authorization", token).status(200).send({
-		message: "Successful login",
-		statusCode: 200,
-		token,
-	});
 });
 
 login.get(`/login`, (req, res) => {

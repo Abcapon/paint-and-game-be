@@ -6,8 +6,9 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 const calculateOrderAmount = (items) => {
 	const totalAmount = items.reduce((accumulator, item) => {
-		return accumulator + item.price;
+		return accumulator + item.price * item.quantity;
 	}, 0);
+	console.log("Calculated total amount:", totalAmount);
 
 	return totalAmount;
 };

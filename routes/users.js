@@ -1,29 +1,22 @@
 const express = require("express");
 const users = express.Router();
 const bcrypt = require(`bcrypt`);
-const multer = require(`multer`);
-const cloudinary = require(`cloudinary`).v2;
-const { CloudinaryStorage } = require(`multer-storage-cloudinary`);
 require(`dotenv`).config();
 const crypto = require(`crypto`);
 const UserModel = require(`../models/users`);
+const jwt = require("jsonwebtoken");
 
-cloudinary.config({
-	cloud_name: process.env.CLOUD_NAME,
-	api_key: process.env.API_KEY,
-	api_secret: process.env.API_SECRET,
-});
+const nodemailer = require("nodemailer");
+const { createTransport } = require("nodemailer");
 
-const cloudStorage = new CloudinaryStorage({
-	cloudinary: cloudinary,
-	params: {
-		folder: `users`,
-		format: async (req, file) => `png`,
-		public_id: (req, file) => file.name,
+const transporter = nodemailer.createTransport({
+	host: "smtp.ethereal.email",
+	port: 587,
+	auth: {
+		user: "ubaldo2@ethereal.email",
+		pass: "xVrffh6xScjuZZ3knU",
 	},
 });
-
-const cloudUpload = multer({ storage: cloudStorage });
 
 users.get("/users", async (req, res) => {
 	const { page = 1, pageSize = 10 } = req.query;
@@ -73,36 +66,123 @@ users.get(`/users/:userId`, async (req, res) => {
 	}
 });
 
-users.post(`/users/create`, cloudUpload.single("avatar"), async (req, res) => {
-	const existingUser = await UserModel.findOne({ email: req.body.email });
-
-	if (existingUser) {
-		return res.status(400).send({
-			statusCode: 400,
-			message: "Email already in use",
-		});
-	}
-
-	const salt = await bcrypt.genSalt(10);
-	const hashedPassword = await bcrypt.hash(req.body.password, salt);
-
-	const newUser = new UserModel({
-		name: req.body.name,
-		surname: req.body.surname,
-		email: req.body.email,
-		avatar: req.file.path,
-		password: hashedPassword,
-	});
-
+users.post(`/users/create`, async (req, res) => {
+	console.log("user:", req.body);
 	try {
+		const existingUser = await UserModel.findOne({ email: req.body.email });
+
+		if (existingUser) {
+			return res.status(400).send({
+				statusCode: 400,
+				message: "Email already in use",
+			});
+		}
+
+		const salt = await bcrypt.genSalt(10);
+		const hashedPassword = await bcrypt.hash(req.body.password, salt);
+
+		const verificationToken = generateVerificationToken();
+
+		const newUser = new UserModel({
+			name: req.body.name,
+			surname: req.body.surname,
+			email: req.body.email,
+			password: hashedPassword,
+			verificationToken: verificationToken,
+			verified: false,
+		});
+
 		const user = await newUser.save();
-		res.status(201).send({
-			statusCode: 201,
-			message: "User saved successfully",
-			user,
+
+		const mailOptions = {
+			from: "ubaldo2@ethereal.email",
+			to: user.email,
+			subject: "Conferma registrazione",
+			text: `Grazie per esserti registrato! Clicca sul seguente link per confermare la tua registrazione: ${process.env.REACT_APP_BASE_URL}/confirm/${verificationToken}`,
+		};
+
+		transporter.sendMail(mailOptions, (error, info) => {
+			if (error) {
+				console.error("Errore nell'invio dell'email di conferma:", error);
+				res.status(500).send({
+					statusCode: 500,
+					message: "Errore nell'invio dell'email di conferma",
+				});
+			} else {
+				console.log("Email di conferma inviata:", info.response);
+				res.status(201).send({
+					statusCode: 201,
+					message: `User saved successfully. Email di conferma inviata a:${user.email}`,
+					user,
+				});
+			}
 		});
 	} catch (error) {
-		console.error("Error during user saving:", error);
+		console.error("Errore durante il salvataggio dell'utente:", error);
+		res.status(500).send({
+			statusCode: 500,
+			message: "Errore interno del server",
+		});
+	}
+});
+
+users.get("/confirm/:token", async (req, res) => {
+	const token = req.params.token;
+
+	try {
+		const user = await UserModel.findOneAndUpdate(
+			{ verificationToken: token, verified: false },
+			{ $set: { verified: true, verificationToken: null } },
+			{ new: true }
+		);
+
+		if (!user) {
+			return res.status(404).json({
+				error: "Token di verifica non valido o utente già verificato",
+			});
+		}
+
+		res
+			.status(200)
+			.json({ message: "Indirizzo email verificato con successo" });
+	} catch (error) {
+		console.error("Errore durante la verifica dell'indirizzo email:", error);
+		res.status(500).json({ error: "Errore interno del server" });
+	}
+});
+
+function generateVerificationToken() {
+	const secretKey = process.env.JWT_SECRET;
+	const expiresIn = "1d";
+
+	const verificationToken = jwt.sign({}, secretKey, { expiresIn });
+
+	return verificationToken;
+}
+
+users.patch(`/users/:userId`, async (req, res) => {
+	const { userId } = req.params;
+	const user = await UserModel.findById(userId);
+	if (!user) {
+		return res.status(400).send({
+			statusCode: 400,
+			message: "User don't found",
+		});
+	}
+	try {
+		const dataToUpdate = req.body;
+		const options = { new: true };
+		const updatedUser = await UserModel.findByIdAndUpdate(
+			userId,
+			dataToUpdate,
+			options
+		);
+		res.status(200).sendStatus({
+			statusCode: 200,
+			message: "User successfully modified",
+			updatedUser,
+		});
+	} catch (e) {
 		res.status(500).send({
 			statusCode: 500,
 			message: "Server internal error",
@@ -110,46 +190,8 @@ users.post(`/users/create`, cloudUpload.single("avatar"), async (req, res) => {
 	}
 });
 
-users.patch(
-	`/users/:userId`,
-	cloudUpload.single("avatar"),
-	async (req, res) => {
-		const { userId } = req.params;
-		const user = await UserModel.findById(userId);
-		if (!user) {
-			return res.status(400).send({
-				statusCode: 400,
-				message: "User don't found",
-			});
-		}
-		try {
-			const dataToUpdate = req.body;
-			if (req.file) {
-				const imageUrl = req.file.path;
-				dataToUpdate.avatar = imageUrl;
-			}
-			const options = { new: true };
-			const updatedUser = await UserModel.findByIdAndUpdate(
-				postId,
-				dataToUpdate,
-				options
-			);
-			res.status(200).sendStatus({
-				statusCode: 200,
-				message: "User successfully modified",
-				updatedUser,
-			});
-		} catch (e) {
-			res.status(500).send({
-				statusCode: 500,
-				message: "Server internal error",
-			});
-		}
-	}
-);
-
 users.delete(`/users/:usersId`, async (req, res) => {
-	const { usersId } = req.params;
+	const { userId } = req.params;
 	try {
 		const user = await UserModel.findByIdAndDelete(userId);
 		if (!user) {

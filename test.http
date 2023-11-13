@@ -12,8 +12,7 @@ Content-Type: application/json
 {
     "nome": "Pippo",
     "cognome": "De Pippus",
-    "email": "depippus@gmail.com",
-    "avatar": "",
+    "email": "abacapon89@gmail.com",
     "password": "passwordDiProva"
 }
 
@@ -52,9 +51,10 @@ Content-Type: application/json
 
 {
   "items": [
-    { "price": 10,
-    "name" : "CicciPicci" },
-    { "price" : 20,
-    "name" : "Pippo"}
+    { "price": 10, "name": "CicciPicci", "quantity": 2 },
+    { "price": 20, "name": "Pippo", "quantity": 1 }
   ]
 }
+
+####
+GET http://localhost:3000/confirm/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2OTk4OTQ3ODIsImV4cCI6MTY5OTk4MTE4Mn0.IjhURzZv9W8Rc9kbPkr_WJB6AnyFQbr4P5R6pfMaHKw
