@@ -57,7 +57,7 @@ products.get("/products/category/:category", async (req, res) => {
 			.limit(pageSize)
 			.skip((page - 1) * pageSize);
 
-		const totalProducts = await ProductModel.count();
+		const totalProducts = await ProductModel.count({ category });
 
 		res.status(200).send({
 			statusCode: 200,
