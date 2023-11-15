@@ -55,6 +55,10 @@ Content-Type: application/json
     { "price": 20, "name": "Pippo", "quantity": 1 }
   ]
 }
+####
+GET http://localhost:5050/products/promo?page=2
+
+
 
 ####
 GET http://localhost:3000/confirm/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2OTk4OTQ3ODIsImV4cCI6MTY5OTk4MTE4Mn0.IjhURzZv9W8Rc9kbPkr_WJB6AnyFQbr4P5R6pfMaHKw

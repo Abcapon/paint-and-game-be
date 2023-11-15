@@ -48,6 +48,56 @@ products.get("/products", async (req, res) => {
 	}
 });
 
+products.get("/products/category/:category", async (req, res) => {
+	const { page = 1, pageSize = 12 } = req.query;
+	const { category } = req.params;
+
+	try {
+		const products = await ProductModel.find({ category })
+			.limit(pageSize)
+			.skip((page - 1) * pageSize);
+
+		const totalProducts = await ProductModel.count();
+
+		res.status(200).send({
+			statusCode: 200,
+			currentPage: Number(page),
+			totalPages: Math.ceil(totalProducts / pageSize),
+			totalProducts,
+			products,
+		});
+	} catch (error) {
+		res.status(500).send({
+			statusCode: 500,
+			message: "Server internal error",
+		});
+	}
+});
+
+products.get("/products/promo", async (req, res) => {
+	const { page = 1, pageSize = 4 } = req.query;
+	try {
+		const products = await ProductModel.find({ isInPromo: true })
+			.limit(pageSize)
+			.skip((page - 1) * pageSize);
+
+		const totalProducts = await ProductModel.count({ isInPromo: true });
+
+		res.status(200).send({
+			statusCode: 200,
+			currentPage: Number(page),
+			totalPages: Math.ceil(totalProducts / pageSize),
+			totalProducts,
+			products,
+		});
+	} catch (error) {
+		res.status(500).send({
+			statusCode: 500,
+			message: "Server internal error",
+		});
+	}
+});
+
 products.post(
 	`/products/create`,
 	cloudUpload.single("cover"),

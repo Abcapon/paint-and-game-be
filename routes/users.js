@@ -126,6 +126,7 @@ users.post(`/users/create`, async (req, res) => {
 	}
 });
 
+// chiamata di verifica tramite mail llink mail
 users.get("/confirm/:token", async (req, res) => {
 	const token = req.params.token;
 
@@ -206,6 +207,51 @@ users.delete(`/users/:usersId`, async (req, res) => {
 			user,
 		});
 	} catch (error) {
+		res.status(500).send({
+			statusCode: 500,
+			message: "Errore interno del server",
+		});
+	}
+});
+
+// chiamata per modificare role ad admin
+
+users.patch(`/users/promote/:userId`, async (req, res) => {
+	try {
+		// Verifica se l'utente che fa la richiesta è un amministratore
+		/*
+		if (req.user.role !== "admin") {
+			return res.status(403).send({
+				statusCode: 403,
+				message: "Solo gli amministratori possono promuovere gli utenti.",
+			});
+		}
+		*/
+
+		// Trova l'utente da promuovere
+		const userToPromote = await UserModel.findById(req.params.userId);
+
+		if (!userToPromote) {
+			return res.status(404).send({
+				statusCode: 404,
+				message: "Utente non trovato.",
+			});
+		}
+
+		// Aggiorna il ruolo dell'utente a "admin"
+		userToPromote.role = "admin";
+		await userToPromote.save();
+
+		res.status(200).send({
+			statusCode: 200,
+			message: "Utente promosso con successo a amministratore.",
+			user: userToPromote,
+		});
+	} catch (error) {
+		console.error(
+			"Errore durante la promozione dell'utente a amministratore:",
+			error
+		);
 		res.status(500).send({
 			statusCode: 500,
 			message: "Errore interno del server",
