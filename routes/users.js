@@ -13,8 +13,8 @@ const transporter = nodemailer.createTransport({
 	host: "smtp.ethereal.email",
 	port: 587,
 	auth: {
-		user: "ubaldo2@ethereal.email",
-		pass: "xVrffh6xScjuZZ3knU",
+		user: "jamey.shields22@ethereal.email",
+		pass: "qu25pjgrxYCMbsKw3Q",
 	},
 });
 
@@ -43,30 +43,8 @@ users.get("/users", async (req, res) => {
 	}
 });
 
-users.get(`/users/:userId`, async (req, res) => {
-	const { userId } = req.params;
-
-	try {
-		const user = await UserModel.findById(userId);
-		if (!user) {
-			return res.status(404).send({
-				statusCode: 404,
-				message: "User don't found",
-			});
-		}
-		res.status(200).send({
-			statusCode: 200,
-			user,
-		});
-	} catch (e) {
-		res.status(500).send({
-			statusCode: 500,
-			message: "Server internal error",
-		});
-	}
-});
-
 users.post(`/users/create`, async (req, res) => {
+	console.log("user:", req.body);
 	try {
 		const existingUser = await UserModel.findOne({ email: req.body.email });
 
@@ -94,7 +72,7 @@ users.post(`/users/create`, async (req, res) => {
 		const user = await newUser.save();
 
 		const mailOptions = {
-			from: "ubaldo2@ethereal.email",
+			from: "jamey.shields22@ethereal.email",
 			to: user.email,
 			subject: "Conferma registrazione",
 			text: `Grazie per esserti registrato! Clicca sul seguente link per confermare la tua registrazione: ${process.env.REACT_APP_BASE_URL}/confirm/${verificationToken}`,
@@ -121,6 +99,29 @@ users.post(`/users/create`, async (req, res) => {
 		res.status(500).send({
 			statusCode: 500,
 			message: "Errore interno del server",
+		});
+	}
+});
+
+users.get(`/users/:userId`, async (req, res) => {
+	const { userId } = req.params;
+
+	try {
+		const user = await UserModel.findById(userId);
+		if (!user) {
+			return res.status(404).send({
+				statusCode: 404,
+				message: "User don't found",
+			});
+		}
+		res.status(200).send({
+			statusCode: 200,
+			user,
+		});
+	} catch (e) {
+		res.status(500).send({
+			statusCode: 500,
+			message: "Server internal error",
 		});
 	}
 });
