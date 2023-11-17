@@ -67,7 +67,6 @@ users.get(`/users/:userId`, async (req, res) => {
 });
 
 users.post(`/users/create`, async (req, res) => {
-	console.log("user:", req.body);
 	try {
 		const existingUser = await UserModel.findOne({ email: req.body.email });
 

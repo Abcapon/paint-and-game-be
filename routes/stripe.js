@@ -8,14 +8,12 @@ const calculateOrderAmount = (items) => {
 	const totalAmount = items.reduce((accumulator, item) => {
 		return accumulator + item.price * item.quantity;
 	}, 0);
-	console.log("Calculated total amount:", totalAmount);
 
 	return totalAmount;
 };
 
 str.post("/create-payment-intent", async (req, res) => {
 	const { items } = req.body;
-	console.log("Received items:", items);
 
 	// Create a PaymentIntent with the order amount and currency
 	const paymentIntent = await stripe.paymentIntents.create({

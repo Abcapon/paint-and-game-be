@@ -48,6 +48,60 @@ products.get("/products", async (req, res) => {
 	}
 });
 
+products.get("/products/promo", async (req, res) => {
+	const { page = 1, pageSize = 4 } = req.query;
+
+	try {
+		const products = await ProductModel.find({ isInPromo: true })
+			.limit(Number(pageSize))
+			.skip((Number(page) - 1) * Number(pageSize))
+			.sort({ updatedAt: -1, createdAt: -1 });
+
+		const totalProducts = await ProductModel.countDocuments({
+			isInPromo: true,
+		});
+
+		res.status(200).send({
+			statusCode: 200,
+			currentPage: Number(page),
+			totalPages: Math.ceil(totalProducts / Number(pageSize)),
+			totalProducts,
+			products,
+		});
+	} catch (error) {
+		res.status(500).send({
+			statusCode: 500,
+			message: "Server internal error",
+			error: error.message,
+		});
+	}
+});
+
+products.get("/products/:id", async (req, res) => {
+	const { id } = req.params;
+
+	try {
+		const product = await ProductModel.findById(id);
+		if (!product) {
+			return res.status(404).send({
+				statusCode: 404,
+				message: "Product not found",
+			});
+		}
+		res.status(200).send({
+			statusCode: 200,
+			product,
+		});
+	} catch (error) {
+		console.error("Error retrieving product:", error);
+		res.status(500).send({
+			statusCode: 500,
+			message: "Server internal error",
+			error: error.message,
+		});
+	}
+});
+
 products.get("/products/category/:category", async (req, res) => {
 	const { page = 1, pageSize = 12 } = req.query;
 	const { category } = req.params;
@@ -58,30 +112,6 @@ products.get("/products/category/:category", async (req, res) => {
 			.skip((page - 1) * pageSize);
 
 		const totalProducts = await ProductModel.count({ category });
-
-		res.status(200).send({
-			statusCode: 200,
-			currentPage: Number(page),
-			totalPages: Math.ceil(totalProducts / pageSize),
-			totalProducts,
-			products,
-		});
-	} catch (error) {
-		res.status(500).send({
-			statusCode: 500,
-			message: "Server internal error",
-		});
-	}
-});
-
-products.get("/products/promo", async (req, res) => {
-	const { page = 1, pageSize = 4 } = req.query;
-	try {
-		const products = await ProductModel.find({ isInPromo: true })
-			.limit(pageSize)
-			.skip((page - 1) * pageSize);
-
-		const totalProducts = await ProductModel.count({ isInPromo: true });
 
 		res.status(200).send({
 			statusCode: 200,
