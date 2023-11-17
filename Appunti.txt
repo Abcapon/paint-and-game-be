@@ -1,2 +1,0 @@
-
-eliminare console.log della rotta stripe
