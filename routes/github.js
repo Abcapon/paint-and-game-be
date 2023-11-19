@@ -44,7 +44,7 @@ gh.get(
 		scope: ["user:email"],
 	}),
 	(req, res) => {
-		const redirectUrl = `http://localhost:3000/success?user=${encodeURIComponent(
+		const redirectUrl = `https://hilarious-duckanoo-65dd6e.netlify.app/success?user=${encodeURIComponent(
 			JSON.stringify(req.user)
 		)}`;
 		res.redirect(redirectUrl);
@@ -59,7 +59,7 @@ gh.get(
 	(req, res) => {
 		const user = req.user;
 		const token = jwt.sign(user, process.env.JWT_SECRET);
-		const redirectUrl = `http://localhost:3000/success/${encodeURIComponent(
+		const redirectUrl = `https://hilarious-duckanoo-65dd6e.netlify.app/success/${encodeURIComponent(
 			token
 		)}`;
 		res.redirect(redirectUrl);
@@ -67,7 +67,7 @@ gh.get(
 );
 
 gh.get("/success", (req, res) => {
-	res.redirect("http://localhost:3000");
+	res.redirect("https://hilarious-duckanoo-65dd6e.netlify.app/");
 });
 /*
 // logout
