@@ -69,12 +69,5 @@ gh.get(
 gh.get("/success", (req, res) => {
 	res.redirect("https://hilarious-duckanoo-65dd6e.netlify.app/");
 });
-/*
-// logout
-gh.get("/logout", (req, res) => {
-	req.logout();
-	res.redirect(`/`);
-});
-*/
 
 module.exports = gh;
