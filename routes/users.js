@@ -13,8 +13,8 @@ const transporter = nodemailer.createTransport({
 	host: "smtp.ethereal.email",
 	port: 587,
 	auth: {
-		user: "juanita73@ethereal.email",
-		pass: "HPnYsRzsVMJypd146K",
+		user: "ruby.strosin@ethereal.email",
+		pass: "7GTv3C7F4gdK2PsvuP",
 	},
 });
 
@@ -72,7 +72,7 @@ users.post(`/users/create`, async (req, res) => {
 		const user = await newUser.save();
 
 		const mailOptions = {
-			from: "juanita73@ethereal.email",
+			from: "ruby.strosin@ethereal.email",
 			to: user.email,
 			subject: "Conferma registrazione",
 			text: `Grazie per esserti registrato! Clicca sul seguente link per confermare la tua registrazione: ${process.env.REACT_APP_BASE_URL}/confirm/${verificationToken}`,
